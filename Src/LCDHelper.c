@@ -105,13 +105,13 @@ void TextLCD_Puts(TextLCDType *lcd, char *string){
 void TextLCD_Putint(TextLCDType *lcd, uint32_t vrefCalc){
 
 	int n = log10(vrefCalc) + 1;
-	   int i;
-	   char *numberArray = calloc(n, sizeof(char));
-	   for ( i = 0; i < n; ++i, vrefCalc /= 10 ){
-	       numberArray[i] = vrefCalc % 10;
-	   }
+	int i;
+	char *numberArray = calloc(n, sizeof(char));
+	for ( i = 0; i < n; ++i, vrefCalc /= 10 ){
+		numberArray[i] = vrefCalc % 10;
+	}
 
-	   TextLCD_Puts(&lcd, numberArray);
+	TextLCD_Puts(&lcd, numberArray);
 
 }
 
