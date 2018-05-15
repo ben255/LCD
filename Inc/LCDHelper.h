@@ -28,5 +28,3 @@ void TextLCD_Puts(TextLCDType *lcd, char *string);
 
 void TextLCD_Printf(TextLCDType *lcd, char * message);
 
-void TextLCD_Putint(TextLCDType *lcd, uint32_t vrefCalc);
-

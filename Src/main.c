@@ -42,6 +42,7 @@
 #include "LCDHelper.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 /* USER CODE BEGIN Includes */
 
@@ -91,9 +92,9 @@ uint32_t intTemp = 0;
 uint32_t termTemp = 0;
 uint32_t vrefCalc = 0;
 
-void printData(TextLCDType * l);
+void printData();
 void calcData();
-
+void printNumber(uint32_t integer);
 
 
 /* USER CODE END 0 */
@@ -146,7 +147,7 @@ int main(void)
   while (1)
   {
 	  calcData();
-	  printData(&lcd);
+	  printData();
 
 
   /* USER CODE END WHILE */
@@ -163,7 +164,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
 		HAL_ADC_Stop_IT(AdcHandle);
 		if(rankCount == 0){
 			//rank 1
-			//calc = 3.3 * (*VREFIN_CAL_ADDR/value);
 
 			vrefData = HAL_ADC_GetValue(&hadc1);
 
@@ -171,7 +171,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
 
 		}else if(rankCount == 1){
 			//rank 2
-			//calc = (80/(*TS_CAL30_ADDR-*TS_CAL110_ADDR))*(value - *TS_CAL30_ADDR) + 30;
 
 			tsData = HAL_ADC_GetValue(&hadc1);
 
@@ -190,22 +189,39 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
 }
 
 void calcData(){
-	vrefCalc = 3.3 * (*VREFIN_CAL_ADDR/vrefData);
+	//1490
+	vrefCalc = (*VREFIN_CAL_ADDR/vrefData);
 	intTemp = (80/(*TS_CAL30_ADDR-*TS_CAL110_ADDR))*(tsData - *TS_CAL30_ADDR) + 30;
+	//T = k x -- m
+	termTemp = 0.033*tempData;
 }
 
-void printData(TextLCDType * l){
+void printData(){
 
-	TextLCD_Position(&l, 0, 0);
-	TextLCD_Puts(&lcd, "VREF: ");
-	TextLCD_Putint(&l, vrefCalc);
+	TextLCD_Position(&lcd, 9, 0);
+	TextLCD_Puts(&lcd, "V:");
+	printNumber(vrefCalc);
 
-	TextLCD_Position(&l, 9, 0);
-	TextLCD_Puts(&lcd, "TS: ");
+	TextLCD_Position(&lcd, 0, 0);
+	TextLCD_Puts(&lcd, "TS:");
+	printNumber(intTemp);
 
-	TextLCD_Position(&l, 0, 1);
-	TextLCD_Puts(&lcd, "Temp: ");
+	TextLCD_Position(&lcd, 0, 1);
+	TextLCD_Puts(&lcd, "Temp:");
+	printNumber(termTemp);
 
+}
+
+void printNumber(uint32_t number){
+
+	int n = log10(number) + 1;
+	int i;
+	char numberArray[n];
+	for ( i = 0; i < n; ++i, number /= 10 ){
+		numberArray[i] = (0x30+(number % 10));
+	}
+	for(int x = n-1; x >= 0; x--)
+		TextLCD_Putchar(&lcd, numberArray[x]);
 }
 
 /**
