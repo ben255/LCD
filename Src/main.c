@@ -93,7 +93,6 @@ uint32_t termTemp = 0;
 uint32_t vrefCalc = 0;
 
 void printData();
-void calcData();
 void printNumber(uint32_t integer);
 
 
@@ -146,7 +145,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  calcData();
 	  printData();
 
 
@@ -161,7 +159,6 @@ int main(void)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
 	if (__HAL_ADC_GET_FLAG(AdcHandle, ADC_FLAG_EOC)){
-		HAL_ADC_Stop_IT(AdcHandle);
 		if(rankCount == 0){
 			//rank 1
 
@@ -182,29 +179,23 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
 
 			rankCount = 0;
 		}
-
-		HAL_ADC_Start_IT(AdcHandle);
 	}
 
 }
 
-void calcData(){
-	//1490
-	vrefCalc = (*VREFIN_CAL_ADDR/vrefData);
-	intTemp = (80/(*TS_CAL30_ADDR-*TS_CAL110_ADDR))*(tsData - *TS_CAL30_ADDR) + 30;
-	//T = k x -- m
-	termTemp = 0.033*tempData;
-}
+
 
 void printData(){
 
-	TextLCD_Position(&lcd, 9, 0);
-	TextLCD_Puts(&lcd, "V:");
-	printNumber(vrefCalc);
+
+	intTemp = (uint32_t) (80/(*TS_CAL30_ADDR-*TS_CAL110_ADDR))*(tsData - *TS_CAL30_ADDR) + 30;
 
 	TextLCD_Position(&lcd, 0, 0);
 	TextLCD_Puts(&lcd, "TS:");
 	printNumber(intTemp);
+
+
+	termTemp = (uint32_t) (tempData * 0.012 - 10.5);
 
 	TextLCD_Position(&lcd, 0, 1);
 	TextLCD_Puts(&lcd, "Temp:");
